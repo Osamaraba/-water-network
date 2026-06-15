@@ -10,6 +10,7 @@ app.py — واجهة Streamlit لتطبيق تحليل توزيع المياه 
   - حفظ/استعادة الجلسة
 """
 import os, json, tempfile, traceback
+import requests
 from datetime import datetime
 from pathlib import Path
 
@@ -20,6 +21,35 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 
 from core_analysis import run_analysis, detect_suspicion_zones
+
+
+def load_from_main_api():
+    """محاولة جلب بيانات المشتركين من التطبيق الرئيسي (خادم FastAPI على port 8002)"""
+    try:
+        resp = requests.get("http://localhost:8002/subscribers", timeout=3)
+        if resp.status_code == 200:
+            data = resp.json()
+            if isinstance(data, list) and len(data) > 0:
+                df = pd.DataFrame(data)
+                from shapely.geometry import Point
+                if "lat" in df.columns and "lon" in df.columns:
+                    df["geometry"] = df.apply(
+                        lambda r: Point(r["lon"], r["lat"]) if pd.notna(r["lon"]) and pd.notna(r["lat"]) else None, axis=1)
+                if "demand" in df.columns and "LastMonth" not in df.columns:
+                    df["LastMonth"] = df["demand"]
+                    df["Avg3Months"] = df["demand"]
+                    df["Avg12Months"] = df["demand"]
+                if "elevation" in df.columns and "delta_h" not in df.columns:
+                    min_elev = df["elevation"].min()
+                    df["delta_h"] = df["elevation"] - min_elev
+                if "CustomerID" not in df.columns and "id" in df.columns:
+                    df["CustomerID"] = df["id"]
+                return df
+    except requests.ConnectionError:
+        pass
+    except Exception as e:
+        print(f"load_from_main_api error: {e}")
+    return None
 
 # ---------------------------------------------------------------------------
 # إعدادات الصفحة
@@ -133,6 +163,16 @@ with st.sidebar:
                 st.session_state[key] = None
         delete_session()
         st.rerun()
+
+    if st.button("📥 تحميل من التطبيق الرئيسي", use_container_width=True, type="secondary"):
+        data = load_from_main_api()
+        if data is not None:
+            st.session_state.customers_gdf = data
+            st.success(f"✅ تم تحميل {len(data)} مشترك من التطبيق الرئيسي")
+            st.rerun()
+        else:
+            st.error("❌ لم يتم العثور على بيانات. تأكد من تشغيل التطبيق الرئيسي على port 8002")
+
     st.markdown("---")
 
     # -- استيراد KML -------------------------------------------------------
