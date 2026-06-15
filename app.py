@@ -18,6 +18,51 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from datetime import datetime, timedelta
+
+# ============================================================
+# ربط مع التطبيق الرئيسي (FastAPI)
+# ============================================================
+
+MAIN_API_URL = "http://localhost:8002"
+
+def fetch_subscribers_from_main_app():
+    """جلب بيانات المشتركين من التطبيق الرئيسي"""
+    try:
+        response = requests.get(f"{MAIN_API_URL}/subscribers", timeout=5)
+        if response.status_code == 200:
+            data = response.json()
+            df = pd.DataFrame(data)
+
+            # تحويل الإحداثيات إلى geometry (لـ geopandas)
+            if 'lat' in df.columns and 'lon' in df.columns:
+                from shapely.geometry import Point
+                df['geometry'] = df.apply(lambda row: Point(row['lon'], row['lat']), axis=1)
+
+            # إذا كان هناك demand واحد فقط، نحوله إلى الأعمدة الثلاثة المطلوبة
+            if 'demand' in df.columns and 'LastMonth' not in df.columns:
+                df['LastMonth'] = df['demand']
+                df['Avg3Months'] = df['demand']
+                df['Avg12Months'] = df['demand']
+
+            return df
+    except requests.exceptions.ConnectionError:
+        st.warning("⚠️ لا يمكن الاتصال بالتطبيق الرئيسي. تأكد من تشغيل FastAPI على المنفذ 8002")
+    except Exception as e:
+        st.error(f"خطأ في جلب البيانات: {e}")
+    return None
+
+def send_analysis_to_main_app(metrics, results_df):
+    """إرسال نتائج التحليل إلى التطبيق الرئيسي (اختياري)"""
+    try:
+        payload = {
+            'metrics': metrics,
+            'results': results_df.to_dict('records')
+        }
+        response = requests.post(f"{MAIN_API_URL}/analysis-results", json=payload, timeout=5)
+        return response.status_code == 200
+    except:
+        return False
 import matplotlib.ticker as mticker
 
 from core_analysis import run_analysis, detect_suspicion_zones
