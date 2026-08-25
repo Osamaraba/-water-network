@@ -266,13 +266,6 @@ async def root():
 async def health_check():
     return {"status": "healthy", "timestamp": time.time()}
 
-@app.get("/debug/perms")
-async def debug_perms(
-    current_employee = Depends(auth.get_current_employee),
-    perms = Depends(auth.get_current_permissions),
-):
-    return {"employee_id": current_employee.employee_id, "role_id": current_employee.role_id, "perms": sorted(perms)}
-
 @app.get("/ready")
 async def readiness_check():
     try:
