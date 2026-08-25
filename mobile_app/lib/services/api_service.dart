@@ -8,7 +8,7 @@ class ApiService {
   // Point this at the backend API. For local Android emulator use http://10.0.2.2:8000
   static const String _baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'https://api.yarmouk-water.jo/v1',
+    defaultValue: 'https://yarmouk-backend.onrender.com/v1',
   );
 
   static final Dio _dio = Dio(BaseOptions(
@@ -410,7 +410,7 @@ class ApiService {
   static Future<List<dynamic>> getZones() async {
     final token = await AuthService().getToken();
     if (token == null) throw Exception('Not authenticated');
-    final response = await _dio.get('/zones/',
+    final response = await _dio.get('/zones',
       options: Options(headers: {'Authorization': 'Bearer $token'}));
     return response.data['data'] as List<dynamic>? ?? [];
   }

@@ -9,7 +9,7 @@ class AuthService {
 
   static const String _baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'https://api.yarmouk-water.jo/v1',
+    defaultValue: 'https://yarmouk-backend.onrender.com/v1',
   );
 
   final Dio _dio = Dio(BaseOptions(

@@ -31,7 +31,7 @@ class DeviceService {
 
     if (defaultTargetPlatform == TargetPlatform.android) {
       final androidInfo = await deviceInfo.androidInfo;
-      rawId = (androidInfo.id ?? '') +
+      rawId = androidInfo.id +
           (androidInfo.brand ?? '') +
           (androidInfo.model ?? '') +
           (androidInfo.fingerprint ?? '');

@@ -2,7 +2,10 @@ import '../models/employee_model.dart';
 
 class AppConstants {
   // API
-  static const String apiBaseUrl = 'https://api.yarmouk-water.jo/v1';
+  static const String apiBaseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'https://yarmouk-backend.onrender.com/v1',
+  );
   static const int apiTimeoutSeconds = 15;
   static const int apiMaxRetries = 3;
 
