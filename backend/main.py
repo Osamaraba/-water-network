@@ -17,7 +17,13 @@ settings = get_settings()
 # they fall back to TEXT so the rest of the platform still runs.
 # Create tables (set DB_RESET=1 to drop & recreate the schema from scratch)
 if os.getenv("DB_RESET") == "1":
-    Base.metadata.drop_all(bind=engine)
+    from sqlalchemy import text
+    with engine.connect() as conn:
+        conn.execution_options(isolation_level="AUTOCOMMIT")
+        conn.execute(text("DROP SCHEMA public CASCADE"))
+        conn.execute(text("CREATE SCHEMA public"))
+        conn.execute(text("GRANT ALL ON SCHEMA public TO public"))
+    engine.dispose()
 Base.metadata.create_all(bind=engine)
 
 
