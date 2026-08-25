@@ -164,8 +164,8 @@ def _seed_universal_user():
         db.commit()
 
 
-_seed_feature_permissions()
 _seed_roles()
+_seed_feature_permissions()
 _seed_superuser()
 _seed_universal_user()
 
