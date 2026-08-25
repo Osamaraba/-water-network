@@ -1,0 +1,94 @@
+name: yarmouk_water_app
+description: Yarmouk Water Company - Employee Attendance & Network Incident Tracking
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # State Management
+  flutter_bloc: ^8.1.3
+  equatable: ^2.0.5
+
+  # Location & Maps
+  geolocator: ^10.1.0
+  geocoding: ^2.1.1
+  flutter_map: ^6.1.0
+  latlong2: ^0.9.0
+
+  # Background Services
+  flutter_background_service: ^5.0.5
+
+  # Local Storage
+  sqflite: ^2.3.0
+  path_provider: ^2.1.1
+  shared_preferences: ^2.2.2
+  flutter_secure_storage: ^9.0.0
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+
+  # Network
+  dio: ^5.4.0
+  connectivity_plus: ^5.0.2
+  web_socket_channel: ^2.4.0
+
+  # Security & Crypto
+  crypto: ^3.0.3
+  encrypt: ^5.0.1
+  local_auth: ^2.1.8
+
+  # UI
+  flutter_screenutil: ^5.9.0
+  flutter_svg: ^2.0.9
+  shimmer: ^3.0.0
+  image_picker: ^1.0.7
+  path: ^1.8.3
+  intl: ^0.20.2
+
+  # Notifications (none currently used; re-add a compatible version if needed)
+  # flutter_local_notifications: ^17.0.0
+
+  # Screenshot & Watermark
+  screenshot: ^3.0.0
+  image: ^4.1.3
+
+  # Device Info
+  device_info_plus: ^9.1.1
+  package_info_plus: ^5.0.1
+
+  # Permission
+  permission_handler: ^11.1.0
+
+  # Charts
+  fl_chart: ^0.66.0
+
+  # PDF Generation
+  pdf: ^3.10.7
+  printing: ^5.11.1
+
+  # Excel Reports
+  excel: ^4.0.6
+
+  # QR Code
+  qr_flutter: ^4.1.0
+  mobile_scanner: ^3.5.5
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/icons/
+    - assets/fonts/

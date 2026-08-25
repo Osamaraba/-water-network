@@ -1,0 +1,58 @@
+# Render Blueprint for Yarmouk Water Platform
+#
+# Deploy method: connect this GitHub repository in the Render dashboard
+# (New -> Blueprint -> select repo -> use this file).
+#
+# Two services are created:
+#   1. yarmouk-backend : FastAPI (Python) web service + managed Postgres + Redis
+#   2. yarmouk-web     : Flutter Web admin built via Docker and served by nginx
+
+services:
+  # ---------------- Backend API ----------------
+  - type: web
+    name: yarmouk-backend
+    runtime: python
+    plan: free
+    region: frankfurt
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: yarmouk-db
+          property: connectionString
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: yarmouk-redis
+          property: connectionString
+    databases:
+      - name: yarmouk-db
+        plan: free
+        databaseName: yarmouk_water
+        user: yarmouk
+        postgresMajorVersion: "15"
+
+  - type: redis
+    name: yarmouk-redis
+    plan: free
+    ipAllowList: []
+
+  # ---------------- Frontend (Web Admin) ----------------
+  - type: web
+    name: yarmouk-web
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./Dockerfile
+    # The web app is compiled with the API base URL below baked in (compile time).
+    # It points at the backend service created by this blueprint.
+    envVars:
+      - key: API_BASE_URL
+        value: "https://yarmouk-backend.onrender.com/v1"
