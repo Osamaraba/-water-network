@@ -1,4 +1,5 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Depends
+from app.routers import auth
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
@@ -264,6 +265,13 @@ async def root():
 @app.get("/health")
 async def health_check():
     return {"status": "healthy", "timestamp": time.time()}
+
+@app.get("/debug/perms")
+async def debug_perms(
+    current_employee = Depends(auth.get_current_employee),
+    perms = Depends(auth.get_current_permissions),
+):
+    return {"employee_id": current_employee.employee_id, "role_id": current_employee.role_id, "perms": sorted(perms)}
 
 @app.get("/ready")
 async def readiness_check():
