@@ -15,3 +15,8 @@ mobile_app/build/
 .DS_Store
 Thumbs.db
 *.log
+
+# Secrets / local credentials (NEVER commit)
+.render_credentials.json
+.render_env
+.env.local

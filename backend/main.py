@@ -15,7 +15,9 @@ settings = get_settings()
 # PostGIS availability is detected at import time in app.geo (which enables the
 # extension when supported). Geometry columns then use native types; otherwise
 # they fall back to TEXT so the rest of the platform still runs.
-# Create tables
+# Create tables (set DB_RESET=1 to drop & recreate the schema from scratch)
+if os.getenv("DB_RESET") == "1":
+    Base.metadata.drop_all(bind=engine)
 Base.metadata.create_all(bind=engine)
 
 
