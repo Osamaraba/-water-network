@@ -25,6 +25,17 @@ if os.getenv("DB_RESET") == "1":
         conn.execute(text("CREATE SCHEMA public"))
         conn.execute(text("GRANT ALL ON SCHEMA public TO public"))
     engine.dispose()
+
+# Ensure the PostGIS extension exists (required for geometry columns).
+# It may have been removed by DROP SCHEMA above, or be missing on a fresh DB.
+from sqlalchemy import text
+try:
+    with engine.connect() as conn:
+        conn.execution_options(isolation_level="AUTOCOMMIT")
+        conn.execute(text("CREATE EXTENSION IF NOT EXISTS postgis"))
+except Exception as _e:
+    print("WARN: could not create postgis extension:", _e)
+
 Base.metadata.create_all(bind=engine)
 
 
