@@ -249,3 +249,12 @@ def scope_by_department(query, employee: Employee):
     if employee.role_id in PRIVILEGED_ROLE_IDS:
         return query
     return query.filter(Employee.department == employee.department)
+
+
+@router.get("/_debug_perms")
+async def debug_perms(
+    employee: Employee = Depends(get_current_employee),
+    db: Session = Depends(get_db),
+):
+    perms = get_current_permissions(employee, db)
+    return success_response(data={"role_id": employee.role_id, "perms": sorted(perms)})
