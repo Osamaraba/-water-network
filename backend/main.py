@@ -164,8 +164,40 @@ def _seed_universal_user():
         db.commit()
 
 
+def _seed_base_permissions():
+    """Ensure every permission code used by routers exists, then grant ALL
+    permissions to the super_admin role (role_id=1). Idempotent."""
+    from app.models.employee import Permission, RolePermission
+
+    codes = [
+        "employee.view", "attendance.view", "attendance.view_own",
+        "gps.view_live", "zone.view", "incident.view",
+        "shift.view", "shift.manage", "overtime.view",
+        "report.view", "report.create",
+        "evaluation.create", "evaluation.view",
+        "incentive.view", "incentive.manage",
+        "inspection.create", "inspection.view", "inspection.update",
+        "departure.create", "departure.view_own", "departure.hr_review",
+    ]
+    with SessionLocal() as db:
+        for code in codes:
+            if not db.query(Permission).filter(Permission.permission_code == code).first():
+                db.add(Permission(permission_code=code, permission_name=code, module="core"))
+        db.commit()
+        # super_admin (role 1) gets every permission that exists
+        admin_perms = db.query(Permission).all()
+        for perm in admin_perms:
+            exists = db.query(RolePermission).filter_by(
+                role_id=1, permission_id=perm.permission_id
+            ).first()
+            if not exists:
+                db.add(RolePermission(role_id=1, permission_id=perm.permission_id))
+        db.commit()
+
+
 _seed_roles()
 _seed_feature_permissions()
+_seed_base_permissions()
 _seed_superuser()
 _seed_universal_user()
 
