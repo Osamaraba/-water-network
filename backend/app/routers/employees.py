@@ -59,7 +59,7 @@ async def update_my_profile(
     }, message="تم تحديث الملف الشخصي")
 
 
-@router.get("/", response_model=List[EmployeeResponse])
+@router.get("", response_model=List[EmployeeResponse])
 async def list_employees(
     department: Optional[str] = None,
     branch: Optional[str] = None,

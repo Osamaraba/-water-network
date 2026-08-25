@@ -299,7 +299,7 @@ async def check_out(
         "trust_status": active_log.trust_status
     }, message="Check-out successful")
 
-@router.get("/")
+@router.get("")
 async def get_attendance(
     date_from: Optional[datetime] = None,
     date_to: Optional[datetime] = None,

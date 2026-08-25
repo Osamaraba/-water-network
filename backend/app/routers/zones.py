@@ -20,7 +20,7 @@ class ZoneCreateRequest(BaseModel):
     polygon_points: Optional[List[List[float]]] = None
     description: Optional[str] = None
 
-@router.get("/")
+@router.get("")
 async def list_zones(
     db: Session = Depends(get_db),
     current_employee: Employee = Depends(get_current_employee)

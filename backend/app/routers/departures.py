@@ -40,7 +40,7 @@ def _serialize(d: Departure):
     }
 
 
-@router.post("/")
+@router.post("")
 async def create_departure(
     request: DepartureCreateRequest,
     db: Session = Depends(get_db),
@@ -80,7 +80,7 @@ async def my_departures(
     return success_response(data=[_serialize(d) for d in departures])
 
 
-@router.get("/")
+@router.get("")
 async def list_departures(
     status: Optional[str] = None,
     db: Session = Depends(get_db),

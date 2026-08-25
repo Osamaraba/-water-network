@@ -28,7 +28,7 @@ class IncidentStatusUpdate(BaseModel):
     latitude: Optional[float] = None
     longitude: Optional[float] = None
 
-@router.post("/")
+@router.post("")
 async def create_incident(
     request: IncidentCreateRequest,
     db: Session = Depends(get_db),
@@ -147,7 +147,7 @@ async def complete_incident(
 
     return success_response(data={"incident_id": incident_id, "status": "completed"})
 
-@router.get("/")
+@router.get("")
 async def list_incidents(
     status: Optional[str] = None,
     db: Session = Depends(get_db),
