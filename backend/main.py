@@ -168,6 +168,61 @@ def _seed_universal_user():
         db.commit()
 
 
+def _seed_employees():
+    """Idempotently create the hierarchical demo employees (EMP001..EMP015)
+    so every role has a real, login-capable account. Password: Yarmouk@2025."""
+    from app.models.employee import Employee
+    from app.utils.security import get_password_hash
+
+    rows = [
+        ("EMP001", "المدير العام", "0790000001", "gm@yarmouk-water.jo", "الإدارة", "عجلون", 2, None, "08:00", "16:00"),
+        ("EMP002", "مدير صيانة", "0790000002", "maint.dir@yarmouk-water.jo", "الصيانة", "عجلون", 5, "EMP001", "08:00", "16:00"),
+        ("EMP003", "مدير توزيع", "0790000003", "dist.dir@yarmouk-water.jo", "التوزيع", "عجلون", 6, "EMP001", "08:00", "16:00"),
+        ("EMP004", "مدير صرف صحي", "0790000004", "sewage.dir@yarmouk-water.jo", "الصرف الصحي", "عجلون", 7, "EMP001", "08:00", "16:00"),
+        ("EMP005", "مشرف ميداني صيانة", "0790000005", "maint.sup@yarmouk-water.jo", "الصيانة", "عجلون", 8, "EMP002", "07:00", "15:00"),
+        ("EMP006", "مشرف ميداني توزيع", "0790000006", "dist.sup@yarmouk-water.jo", "التوزيع", "عجلون", 8, "EMP003", "07:00", "15:00"),
+        ("EMP007", "فني صيانة", "0790000007", "maint1@yarmouk-water.jo", "الصيانة", "عجلون", 11, "EMP005", "07:00", "15:00"),
+        ("EMP008", "موزع مياه", "0790000008", "dist1@yarmouk-water.jo", "التوزيع", "عجلون", 12, "EMP006", "06:00", "14:00"),
+        ("EMP009", "عامل صرف صحي", "0790000009", "sewage1@yarmouk-water.jo", "الصرف الصحي", "عجلون", 13, "EMP004", "07:00", "15:00"),
+        ("EMP010", "موظف مكتبي", "0790000010", "office1@yarmouk-water.jo", "المكتب", "عجلون", 9, "EMP001", "08:00", "16:00"),
+        ("EMP011", "موظف مكتب وميدان", "0790000011", "officefield1@yarmouk-water.jo", "المكتب", "عجلون", 10, "EMP001", "08:00", "16:00"),
+        ("EMP012", "جابي", "0790000012", "collector1@yarmouk-water.jo", "الجباية", "عجلون", 14, "EMP001", "08:00", "16:00"),
+        ("EMP013", "مهندس GIS", "0790000013", "gis1@yarmouk-water.jo", "GIS", "عجلون", 15, "EMP001", "08:00", "16:00"),
+        ("EMP014", "مدقق", "0790000014", "auditor1@yarmouk-water.jo", "التدقيق", "عجلون", 16, "EMP001", "08:00", "16:00"),
+        ("EMP015", "مستخدم قراءة فقط", "0790000015", "readonly1@yarmouk-water.jo", "الإدارة", "عجلون", 17, "EMP001", "08:00", "16:00"),
+    ]
+
+    with SessionLocal() as db:
+        for num, name, phone, email, dept, branch, role_id, _sup, s_start, s_end in rows:
+            if db.query(Employee).filter(Employee.employee_number == num).first():
+                continue
+            emp = Employee(
+                employee_number=num,
+                full_name=name,
+                phone=phone,
+                email=email,
+                department=dept,
+                branch=branch,
+                role_id=role_id,
+                status="active",
+                password_hash=get_password_hash("Yarmouk@2025"),
+                shift_start=s_start,
+                shift_end=s_end,
+            )
+            db.add(emp)
+        db.commit()
+
+        all_emp = {e.employee_number: e for e in db.query(Employee).all()}
+        for num, name, phone, email, dept, branch, role_id, sup, s_start, s_end in rows:
+            if not sup:
+                continue
+            emp = all_emp.get(num)
+            sup_emp = all_emp.get(sup)
+            if emp and sup_emp and emp.supervisor_id != sup_emp.employee_id:
+                emp.supervisor_id = sup_emp.employee_id
+        db.commit()
+
+
 def _seed_base_permissions():
     """Ensure every permission code used by routers exists, then grant ALL
     permissions to the super_admin role (role_id=1). Idempotent."""
@@ -204,6 +259,7 @@ _seed_feature_permissions()
 _seed_base_permissions()
 _seed_superuser()
 _seed_universal_user()
+_seed_employees()
 
 app = FastAPI(
     title=settings.APP_NAME,
