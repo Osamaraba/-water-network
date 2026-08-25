@@ -171,7 +171,7 @@ def _seed_universal_user():
 def _seed_employees():
     """Idempotently create the hierarchical demo employees (EMP001..EMP015)
     so every role has a real, login-capable account. Password: Yarmouk@2025."""
-    from app.models.employee import Employee
+    from app.models.employee import Employee, EmployeeDevice
     from app.utils.security import get_password_hash
 
     rows = [
@@ -226,6 +226,29 @@ def _seed_employees():
                         changed = True
                 if changed:
                     db.flush()
+        db.commit()
+
+        all_emp = {e.employee_number: e for e in db.query(Employee).all()}
+        for num, name, phone, email, dept, branch, role_id, sup, s_start, s_end in rows:
+            emp = all_emp.get(num)
+            if not emp:
+                continue
+            existing_device = db.query(EmployeeDevice).filter(
+                EmployeeDevice.employee_id == emp.employee_id
+            ).first()
+            if not existing_device:
+                device = EmployeeDevice(
+                    employee_id=emp.employee_id,
+                    installation_id=f"seed-{num}",
+                    device_uuid=f"seed-{num}",
+                    platform="web",
+                    manufacturer="seed",
+                    model="seed",
+                    os_version="1",
+                    app_version="1.0.0",
+                    is_primary=True,
+                )
+                db.add(device)
         db.commit()
 
 
