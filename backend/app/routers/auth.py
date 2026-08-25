@@ -257,4 +257,12 @@ async def debug_perms(
     db: Session = Depends(get_db),
 ):
     perms = get_current_permissions(employee, db)
-    return success_response(data={"role_id": employee.role_id, "perms": sorted(perms)})
+    rp = db.query(RolePermission).filter(RolePermission.role_id == employee.role_id).count()
+    return success_response(data={
+        "employee_id": employee.employee_id,
+        "employee_number": employee.employee_number,
+        "role_id": employee.role_id,
+        "perms_count": len(perms),
+        "perms": sorted(perms),
+        "role_permissions_count": rp,
+    })

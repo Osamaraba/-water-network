@@ -193,33 +193,39 @@ def _seed_employees():
     ]
 
     with SessionLocal() as db:
-        for num, name, phone, email, dept, branch, role_id, _sup, s_start, s_end in rows:
-            if db.query(Employee).filter(Employee.employee_number == num).first():
-                continue
-            emp = Employee(
-                employee_number=num,
-                full_name=name,
-                phone=phone,
-                email=email,
-                department=dept,
-                branch=branch,
-                role_id=role_id,
-                status="active",
-                password_hash=get_password_hash("Yarmouk@2025"),
-                shift_start=s_start,
-                shift_end=s_end,
-            )
-            db.add(emp)
-        db.commit()
-
-        all_emp = {e.employee_number: e for e in db.query(Employee).all()}
         for num, name, phone, email, dept, branch, role_id, sup, s_start, s_end in rows:
-            if not sup:
-                continue
-            emp = all_emp.get(num)
-            sup_emp = all_emp.get(sup)
-            if emp and sup_emp and emp.supervisor_id != sup_emp.employee_id:
-                emp.supervisor_id = sup_emp.employee_id
+            emp = db.query(Employee).filter(Employee.employee_number == num).first()
+            if not emp:
+                emp = Employee(
+                    employee_number=num,
+                    full_name=name,
+                    phone=phone,
+                    email=email,
+                    department=dept,
+                    branch=branch,
+                    role_id=role_id,
+                    status="active",
+                    password_hash=get_password_hash("Yarmouk@2025"),
+                    shift_start=s_start,
+                    shift_end=s_end,
+                )
+                db.add(emp)
+                db.flush()
+            else:
+                changed = False
+                if emp.role_id != role_id:
+                    emp.role_id = role_id
+                    changed = True
+                if emp.password_hash is None:
+                    emp.password_hash = get_password_hash("Yarmouk@2025")
+                    changed = True
+                if sup:
+                    sup_emp = db.query(Employee).filter(Employee.employee_number == sup).first()
+                    if sup_emp and emp.supervisor_id != sup_emp.employee_id:
+                        emp.supervisor_id = sup_emp.employee_id
+                        changed = True
+                if changed:
+                    db.flush()
         db.commit()
 
 
