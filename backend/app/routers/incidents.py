@@ -32,7 +32,7 @@ class IncidentStatusUpdate(BaseModel):
 async def create_incident(
     request: IncidentCreateRequest,
     db: Session = Depends(get_db),
-    current_employee: Employee = Depends(get_current_employee)
+    current_employee: Employee = Depends(RequirePermission("incident.create"))
 ):
     import uuid
     incident = Incident(

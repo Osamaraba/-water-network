@@ -132,8 +132,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(AuthAuthenticated(employee, token));
         return;
       }
-      // No saved session: log in directly with the shared universal account.
-      add(const AuthLoginRequested('ENG.OR', 'ENG.OR'));
+      // No saved session: require explicit login, no hidden/shared accounts.
+      emit(const AuthUnauthenticated());
     } catch (e) {
       emit(const AuthUnauthenticated());
     }

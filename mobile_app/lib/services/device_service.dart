@@ -2,6 +2,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:crypto/crypto.dart';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DeviceService {
   static String? _cachedUuid;
@@ -9,9 +10,19 @@ class DeviceService {
   Future<String> getDeviceUuid() async {
     if (_cachedUuid != null) return _cachedUuid!;
 
-    // Web monitoring console is not bound to a physical device.
+    // Web monitoring console uses a stable per-browser UUID stored locally
+    // so device binding works without a physical device identifier.
     if (kIsWeb) {
-      _cachedUuid = '';
+      const key = 'yarmouk_web_device_uuid';
+      final prefs = await SharedPreferences.getInstance();
+      final stored = prefs.getString(key);
+      if (stored != null && stored.isNotEmpty) {
+        _cachedUuid = stored;
+        return _cachedUuid!;
+      }
+      final generated = _generateWebUuid();
+      await prefs.setString(key, generated);
+      _cachedUuid = generated;
       return _cachedUuid!;
     }
 
@@ -38,6 +49,13 @@ class DeviceService {
     _cachedUuid = digest.toString().substring(0, 32);
 
     return _cachedUuid!;
+  }
+
+  String _generateWebUuid() {
+    final raw = utf8.encode(
+        '${DateTime.now().microsecondsSinceEpoch}-${DateTime.now().toIso8601String()}');
+    final digest = sha256.convert(raw);
+    return digest.toString().substring(0, 32);
   }
 
   Future<Map<String, dynamic>> getDeviceInfo() async {

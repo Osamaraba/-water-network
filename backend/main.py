@@ -73,6 +73,9 @@ def _seed_feature_permissions():
             "departure.create": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17],
             "departure.view_own": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17],
             "departure.hr_review": [1, 2, 3],
+            "zone.view": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17],
+            "incident.view": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17],
+            "incident.create": [1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14],
         }
         for code, role_ids in grants.items():
             perm = db.query(Permission).filter(Permission.permission_code == code).first()
@@ -172,7 +175,7 @@ def _seed_base_permissions():
 
     codes = [
         "employee.view", "attendance.view", "attendance.view_own",
-        "gps.view_live", "zone.view", "incident.view",
+        "gps.view_live", "zone.view", "incident.view", "incident.create",
         "shift.view", "shift.manage", "overtime.view",
         "report.view", "report.create",
         "evaluation.create", "evaluation.view",
