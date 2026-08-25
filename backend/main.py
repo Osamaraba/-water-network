@@ -18,6 +18,7 @@ settings = get_settings()
 # Create tables (set DB_RESET=1 to drop & recreate the schema from scratch)
 if os.getenv("DB_RESET") == "1":
     from sqlalchemy import text
+    engine.dispose()
     with engine.connect() as conn:
         conn.execution_options(isolation_level="AUTOCOMMIT")
         conn.execute(text("DROP SCHEMA public CASCADE"))
