@@ -51,6 +51,7 @@ services:
     plan: free
     region: frankfurt
     dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
     # The web app is compiled with the API base URL below baked in (compile time).
     # It points at the backend service created by this blueprint.
     envVars:

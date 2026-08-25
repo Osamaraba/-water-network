@@ -19,5 +19,6 @@ RUN flutter build web -t lib/main_web.dart \
 # ---- Serve stage: nginx ----
 FROM nginx:alpine AS serve
 COPY --from=build /app/build/web /usr/share/nginx/html
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+COPY nginx-docker.conf /etc/nginx/conf.d/default.conf
+COPY docker-entrypoint.sh /docker-entrypoint.d/40-port.sh
+RUN chmod +x /docker-entrypoint.d/40-port.sh
